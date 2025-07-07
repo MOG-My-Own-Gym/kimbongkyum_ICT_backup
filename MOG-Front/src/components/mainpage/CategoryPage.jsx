@@ -1,9 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styles from "../../assets/bootstrap/css/mainpage.module.css";
 import "../../assets/bootstrap/css/bootstrap.css";
 import { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { URL } from "../../config/constants";
 
-export default function CategoryPage({useRoutineData,setRoutineData}){
+export default function CategoryPage({useDataRoutine,setDataRoutine}){
     const makeListNode =[];
     const id = [];
     const nameR = [];
@@ -33,8 +35,10 @@ export default function CategoryPage({useRoutineData,setRoutineData}){
     const [isHidden, setIsHidden] = useState(true);
     const [test, settest] = useState([]);
     
+    const {state} = useLocation();
     const navigate = useNavigate();
     const makeRoutineContainer = useRef(null);
+    console.log('state:',state);
 
     function makedetil(e,nameStr){
         e.preventDefault();
@@ -54,13 +58,29 @@ export default function CategoryPage({useRoutineData,setRoutineData}){
         )        
         setDeduplicationDetail(filterMakeListNode);      
     }
+    const [useCount,setConunt] = useState(1);
+    const makeRoutineButton= async () => {
+        //e.preventDefault();
+        console.log('useDataRoutine:',useDataRoutine[state-1].name);
+        if(state===false){
+            setConunt(prev=>prev+1);
+            const nameR = 'routine'+useCount;
+            const response = await axios.post(URL.ROUNTINE,{id:useDataRoutine.length+1,name:nameR,state:[...initSaveExercise]})
+            setDataRoutine(prev=>[...prev,response.data]);
+            navigate("/data/routine",{state:useDataRoutine.length+1})
+        }else{
+            //console.log('NomakeRoutine')
+            await axios.put(`${URL.ROUNTINE}`,{id:useDataRoutine[state-1].id,name:useDataRoutine[state-1].name,state:[...initSaveExercise]})
+            setDataRoutine(prev=>[...prev[state-1].state,...initSaveExercise]);
+            navigate("/data/routine",{state:state})
+        }
+    }
 
     const saveRoutineButton=(e)=>{
         e.preventDefault();
         saveR = initmakeDetail.filter(item =>
         item.names.includes(e.currentTarget.id));
         setSaveExercise(prev=>[...prev,...saveR]); 
-        setRoutineData(prev=>({...prev,state:[prev.state,...saveR]}));
         settest(prev=>[...prev,...saveR]);
         countSaveRoutineInt = initSaveExercise.filter(item=>item.names===e.currentTarget.id).length+1;
         e.target.children[1].textContent=countSaveRoutineInt;
@@ -78,13 +98,13 @@ export default function CategoryPage({useRoutineData,setRoutineData}){
         const deleteSaveData = initSaveExercise.slice(0,-1);
         setSaveExercise(deleteSaveData);
         const spanNode = document.getElementById(initSaveExerciseSpan[initSaveExerciseSpan.length -1]);
-        const compreToDeleteEx = spanNode.id.slice(0,-4);
-        countSaveRoutineInt = initSaveExercise.filter(item=>item.names===compreToDeleteEx).length-1;
-        if(countSaveRoutineInt===0) {
-            spanNode.textContent='';
+        if(initSaveExercise.length === 0) {
+            document.querySelectorAll('span').textContent='';
             setIsHidden(true);
         }
         else {
+            const compreToDeleteEx = spanNode.id.slice(0,-4);
+            countSaveRoutineInt = initSaveExercise.filter(item=>item.names===compreToDeleteEx).length-1;
             spanNode.textContent=countSaveRoutineInt;
             setIsHidden(false);
         }
@@ -246,7 +266,7 @@ export default function CategoryPage({useRoutineData,setRoutineData}){
             </div>
             <div className={`${styles.dummyContainers} p-5 mt-4`}></div>
             <footer className={`${styles.flexSelectButton}`}>
-                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={()=>navigate("/routine",{state:initSaveExercise})} hidden={isHidden}>운동 추가</button>
+                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={makeRoutineButton} hidden={isHidden}>운동 추가</button>
                 <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={e=>deleteRoutineButten(e)} hidden={isHidden}>되돌리기</button>
             </footer>
         </div>

@@ -14,8 +14,8 @@ export default function RunningRoutinePage(){
                 </div>
             <div className={`${styles.dummyContainers} p-5 mt-4`}></div>
             <footer className={`${styles.flexButton}`}>
-                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={()=>navigate("/routineresult")}>운동 완료</button>
-                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={()=>navigate("/select")}>운동 추가</button>
+                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={()=>navigate("/data/routineresult")}>운동 완료</button>
+                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={()=>navigate("/data/select")}>운동 추가</button>
             </footer>
         </div>
 

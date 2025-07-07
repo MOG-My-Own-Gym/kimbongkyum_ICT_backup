@@ -11,7 +11,7 @@ export default function Login() {
 
     if (username && password) {
       sessionStorage.setItem('username', username);
-      navigate('/home');
+      navigate('/data/');
     } else {
       alert('아이디와 비밀번호를 입력하세요');
     }

@@ -2,19 +2,24 @@ import { useLocation, useNavigate } from "react-router-dom";
 import styles from "../../assets/bootstrap/css/mainpage.module.css";
 import "../../assets/bootstrap/css/bootstrap.css";
 import { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { URL } from "../../config/constants";
 
 export default function RoutinePage(){
     const navigate = useNavigate();
     const [initMakeRoutine, setMakeRoutine] = useState([]);
-    const location = useLocation();
     const makeRoutineBoxRef = useRef();
+    const location = useLocation();
     useEffect(()=>{
-        setMakeRoutine([...location.state]);
+        //setMakeRoutine([...location.state]);
+        axios.get(URL.ROUNTINE)
+            .then(res=> setMakeRoutine(res.data[location.state-1].state))
+            //.then(res=> console.log(res.data[location.state-1].state))
+        //console.log('state:',location.state);
     },[])
-    console.log('sdfsdfsdf',location);
     return<>
         <div className={"container mt-5 p-3"}></div>
-        <button className={`btn btn-lg btn-primary`} type="button" onClick={()=>navigate('/home')}>뒤로가기</button>
+        <button className={`btn btn-lg btn-primary`} type="button" onClick={()=>navigate('/data/')}>뒤로가기</button>
         <div className={`${styles.mainpage} container mt-0 p-0`}>
                 <div ref={makeRoutineBoxRef} className={"container mt-0 p-0"}>
                     {
@@ -31,8 +36,8 @@ export default function RoutinePage(){
                 </div>
             <div className={`${styles.dummyContainers} p-5 mt-4`}></div>
             <footer className={`${styles.flexButton}`}>
-                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={(e)=>{navigate("/runningroutine");e.target.value=='운동 완료'?e.target.value='운동 시작':e.target.value='운동 완료';}}>운동 시작</button>
-                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={()=>navigate("/select")}>운동 추가</button>
+                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={(e)=>{navigate("/data/runningroutine");e.target.value=='운동 완료'?e.target.value='운동 시작':e.target.value='운동 완료';}}>운동 시작</button>
+                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={()=>navigate("/data/select",{state:location.state})}>운동 추가</button>
             </footer>
         </div>
 
