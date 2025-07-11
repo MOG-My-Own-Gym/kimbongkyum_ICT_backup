@@ -11,19 +11,20 @@ import { URL } from "../../config/constants";
 const DataToss=()=>{
     const [useDataRoutine,setDataRoutine] = useState();
 
-    useEffect(()=>{
-        const fetchData = async () => {
+     const fetchData = async () => {
             const response = await axios.get(URL.ROUNTINE);
             setDataRoutine(response.data); // 가져온 데이터 저장
         };
-        fetchData();
-        //console.log(useDataRoutine);
+
+    useEffect(()=>{
+        //fetchData();
+        console.log('처음 useDataRoutine:',useDataRoutine);
     },[])
     return <>
         <Routes>
-            <Route path="" element={<SelectMainpage useDataRoutine={useDataRoutine} />}></Route>
-            <Route path="/select" element={<CategoryPage useDataRoutine={useDataRoutine} setDataRoutine={setDataRoutine}/>}></Route>
-            <Route path="/routine" element={<RoutinePage />}></Route>
+            <Route path="" element={<SelectMainpage useDataRoutine={useDataRoutine} fetchData={fetchData}/>}></Route>
+            <Route path="/select" element={<CategoryPage useDataRoutine={useDataRoutine} fetchData={fetchData}/>}></Route>
+            <Route path="/routine" element={<RoutinePage useDataRoutine={useDataRoutine} />}></Route>
             <Route path="/runningroutine" element={<RunningRoutinePage />}></Route>
             <Route path="/routineresult" element={<RoutineResultPage />}></Route>
         </Routes>

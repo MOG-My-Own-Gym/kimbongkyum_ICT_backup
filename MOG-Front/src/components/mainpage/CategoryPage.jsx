@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { URL } from "../../config/constants";
 
-export default function CategoryPage({useDataRoutine,setDataRoutine}){
+export default function CategoryPage({useDataRoutine,fetchData}){
     const makeListNode =[];
     const id = [];
     const nameR = [];
@@ -19,6 +19,7 @@ export default function CategoryPage({useDataRoutine,setDataRoutine}){
     let countSaveRoutineInt;
     let makeDetailList;
     let saveR;
+    let addSetId;
 
     const [initcategory,setCategory] = useState([]);
     const [initequipment,setEquipment] = useState([]);
@@ -59,21 +60,36 @@ export default function CategoryPage({useDataRoutine,setDataRoutine}){
         setDeduplicationDetail(filterMakeListNode);      
     }
     const [useCount,setConunt] = useState(1);
+    //console.log('useCount:',useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1);
+    
     const makeRoutineButton= async () => {
         //e.preventDefault();
-        console.log('useDataRoutine:',useDataRoutine[state-1].name);
-        if(state===false){
-            setConunt(prev=>prev+1);
-            const nameR = 'routine'+useCount;
-            const response = await axios.post(URL.ROUNTINE,{id:useDataRoutine.length+1,name:nameR,state:[...initSaveExercise]})
-            setDataRoutine(prev=>[...prev,response.data]);
-            navigate("/data/routine",{state:useDataRoutine.length+1})
+        //fetchData();
+        console.log('useDataRoutine=======:',useDataRoutine);
+        if(state===null) {alert('루틴 생성 실패'); return;}
+        if(state===true){
+            //setConunt(prev=>prev+1);
+            //setSaveExercise(res=>res.map((item,index)=>({...item,id:String(1+index)})));
+            addSetId = initSaveExercise.map((item,index)=>({...item,set_id: String(index + 1)}));
+            const nameR = 'routine'+String(useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1);
+            const response = await axios.post(URL.ROUNTINE,{id:String(useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1),name:nameR,state:[...addSetId]})
+            //setDataRoutine(prev=>[...prev,response.data]);
+            navigate(`/data/routine?routineId=${useDataRoutine.length+1}`)
         }else{
-            //console.log('NomakeRoutine')
-            await axios.put(`${URL.ROUNTINE}`,{id:useDataRoutine[state-1].id,name:useDataRoutine[state-1].name,state:[...initSaveExercise]})
-            setDataRoutine(prev=>[...prev[state-1].state,...initSaveExercise]);
-            navigate("/data/routine",{state:state})
+            const makeRoutineId = useDataRoutine[state-1].state.length===0?0:Math.max(...useDataRoutine[state-1].state.map(item=>parseInt(item.set_id)));
+            console.log('useDataRoutine[state-1].state:',useDataRoutine[state-1].state);
+            console.log('makeRoutineId:',makeRoutineId);
+            //console.log('initSaveExercise2:',initSaveExercise);
+            addSetId = initSaveExercise.map((item,index)=>({...item,set_id: String(makeRoutineId + index + 1)}));
+            console.log('initSaveExercise3:',addSetId);
+            await axios.put(`${URL.ROUNTINE}/${state}`,{id:String(useDataRoutine[state-1].id),name:useDataRoutine[state-1].name,state:[...useDataRoutine[state-1].state, ...addSetId]})
+                        .then(res=>console.log('res:%O',res))
+                        .catch(err=>console.log(err))
+            //setDataRoutine(prev=>[...prev[state-1].state,...initSaveExercise]);
+            navigate(`/data/routine?routineId=${state}`)
+            //navigate("/data/routine",{state:state})
         }
+            
     }
 
     const saveRoutineButton=(e)=>{
@@ -110,10 +126,6 @@ export default function CategoryPage({useDataRoutine,setDataRoutine}){
         }
         setSaveExerciseSpan(initSaveExerciseSpan.slice(0,-1)!==null?initSaveExerciseSpan.slice(0,-1):[]);
     }
-     useEffect(()=>{
-        console.log('test:',test);
-        console.log('initSaveExercise:',initSaveExercise)
-     },[initSaveExercise]);
     
     useEffect(()=>{
         const filteredItems = initmakeDetail.filter(item =>
@@ -145,7 +157,7 @@ export default function CategoryPage({useDataRoutine,setDataRoutine}){
                     secondaryMuscles.push(arr[i].secondaryMuscles[0]);
 
                     makeDetailNode.push({
-                        id: i+1,
+                        id: String(i+1),
                         names: arr[i].name,
                         category: arr[i].category,
                         equipment: arr[i].equipment,
@@ -180,13 +192,12 @@ export default function CategoryPage({useDataRoutine,setDataRoutine}){
                 setPrimaryMuscles(Object.values(makeListNode[0].primaryMuscles))
                 setSecondaryMuscles(Object.values(makeListNode[0].secondaryMuscles))
             });    
-       
-            
+        fetchData();
     },[])
     
     return<>
         <div className={"container mt-5 p-3"}></div>
-            <button className={`btn btn-lg btn-primary`} type="button" onClick={()=>navigate(-1)}>뒤로가기</button>
+            <button className={`btn btn-lg btn-primary`} type="button" onClick={()=>navigate('/data/')}>뒤로가기</button>
             <form className={"d-flex"}>
                 <input className={"form-control me-sm-2"} type="search" placeholder="운동 이름을 입력하세요." onChange={e => setSearch(e.target.value)}/>
             </form>
@@ -252,7 +263,11 @@ export default function CategoryPage({useDataRoutine,setDataRoutine}){
                 
             </div>
             <div ref={makeRoutineContainer} className={"container mt-0 p-0 d-grid gap-2"}>
-                {initDeduplicationDetail.map(item=>(
+                {initDeduplicationDetail.length===0
+                ?
+                <h1>불러오는 중</h1>
+                :
+                initDeduplicationDetail.map(item=>(
                     <div className="container" key={item.id}>
                         <button  className="btn btn-lg btn-dark"  id={item.names}
                             style={{width:'100%', fontSize:'25px', textAlign:'left',display:'flex'}}  
