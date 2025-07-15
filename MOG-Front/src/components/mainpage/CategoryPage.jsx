@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { URL } from "../../config/constants";
 
-export default function CategoryPage({useDataRoutine,fetchData}){
+export default function CategoryPage({useDataRoutine,fetchData,detailData,useDetailExData}){
     const makeListNode =[];
     const id = [];
     const nameR = [];
@@ -67,12 +67,29 @@ export default function CategoryPage({useDataRoutine,fetchData}){
         //fetchData();
         console.log('useDataRoutine=======:',useDataRoutine);
         if(state===null) {alert('루틴 생성 실패'); return;}
+        const makeDetailNode =[];
         if(state===true){
             //setConunt(prev=>prev+1);
             //setSaveExercise(res=>res.map((item,index)=>({...item,id:String(1+index)})));
             addSetId = initSaveExercise.map((item,index)=>({...item,set_id: String(index + 1)}));
             const nameR = 'routine'+String(useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1);
-            const response = await axios.post(URL.ROUNTINE,{id:String(useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1),name:nameR,state:[...addSetId]})
+            await axios.post(URL.ROUNTINE,{id:String(useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1),name:nameR,state:[...addSetId]})
+            console.log('addSetId의 값1:',addSetId);
+            for(let i=0;i <= addSetId.length-1;i++){
+                console.log('state[i].id:',addSetId[i].id);
+                makeDetailNode.push({
+                    id: addSetId[i].set_id,
+                    names: addSetId[i].names,
+                    lest:"30",
+                    set: [{
+                        id:"1",
+                        weight: "0",    
+                        many: "0",
+                    }]
+                })
+               
+            }
+            await axios.post(URL.ROUTINEDETAIL,{id:String(useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1),state:[...makeDetailNode]})
             //setDataRoutine(prev=>[...prev,response.data]);
             navigate(`/data/routine?routineId=${useDataRoutine.length+1}`)
         }else{
@@ -81,14 +98,33 @@ export default function CategoryPage({useDataRoutine,fetchData}){
             console.log('makeRoutineId:',makeRoutineId);
             //console.log('initSaveExercise2:',initSaveExercise);
             addSetId = initSaveExercise.map((item,index)=>({...item,set_id: String(makeRoutineId + index + 1)}));
-            console.log('initSaveExercise3:',addSetId);
+            console.log('addSetId의 값2:',addSetId);
+            console.log('useDetailExData디테일 값:',useDetailExData);
             await axios.put(`${URL.ROUNTINE}/${state}`,{id:String(useDataRoutine[state-1].id),name:useDataRoutine[state-1].name,state:[...useDataRoutine[state-1].state, ...addSetId]})
                         .then(res=>console.log('res:%O',res))
                         .catch(err=>console.log(err))
+            //console.log('state[i].id:',addSetId[i].id);
+            //const makeDetailNode2= [useDetailExData[state-1]].map((item,index)=>({...item, id: String(item.length + index + 1),names: addSetId[index].names}))
+            for(let i=0;i <= addSetId.length-1;i++){
+                console.log('state[i].id:',addSetId[i].id);
+                makeDetailNode.push({
+                    id: addSetId[i].set_id,
+                    names: addSetId[i].names,
+                    lest:"30",
+                    set: [{
+                        id:"1",
+                        weight: "0",    
+                        many: "0",
+                    }]
+                })
+            }
+            console.log('최종 디테일 값 makeDetailNode:',makeDetailNode);
+            await axios.put(`${URL.ROUTINEDETAIL}/${state}`,{id:String(useDataRoutine[state-1].id),state:[...useDetailExData[state-1].state,...makeDetailNode]})
             //setDataRoutine(prev=>[...prev[state-1].state,...initSaveExercise]);
             navigate(`/data/routine?routineId=${state}`)
             //navigate("/data/routine",{state:state})
         }
+        
             
     }
 
@@ -193,6 +229,7 @@ export default function CategoryPage({useDataRoutine,fetchData}){
                 setSecondaryMuscles(Object.values(makeListNode[0].secondaryMuscles))
             });    
         fetchData();
+        detailData();
     },[])
     
     return<>

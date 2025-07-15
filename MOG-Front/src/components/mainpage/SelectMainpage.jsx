@@ -18,6 +18,7 @@ export default function SelectMainpage({useDataRoutine,fetchData}){
         //const lastS = e.target.id.charAt(e.target.id.length - 1);
         //console.log('lastS:',lastS);
         await axios.delete(`${URL.ROUNTINE}/${e.target.id}`)
+        await axios.delete(`${URL.ROUTINEDETAIL}/${e.target.id}`)
         fetchData();
     }
    

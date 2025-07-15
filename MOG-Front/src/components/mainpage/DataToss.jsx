@@ -10,11 +10,16 @@ import { URL } from "../../config/constants";
 
 const DataToss=()=>{
     const [useDataRoutine,setDataRoutine] = useState();
+    const [useDetailExData,setDetailExData] = useState();
 
-     const fetchData = async () => {
-            const response = await axios.get(URL.ROUNTINE);
-            setDataRoutine(response.data); // 가져온 데이터 저장
-        };
+    const fetchData = async () => {
+        const response = await axios.get(URL.ROUNTINE);
+        setDataRoutine(response.data); // 가져온 데이터 저장
+    };
+    const detailData = async ()=>{
+        const detailDataR = await axios.get(URL.ROUTINEDETAIL);
+        setDetailExData(detailDataR.data);
+    }
 
     useEffect(()=>{
         //fetchData();
@@ -23,8 +28,8 @@ const DataToss=()=>{
     return <>
         <Routes>
             <Route path="" element={<SelectMainpage useDataRoutine={useDataRoutine} fetchData={fetchData}/>}></Route>
-            <Route path="/select" element={<CategoryPage useDataRoutine={useDataRoutine} fetchData={fetchData}/>}></Route>
-            <Route path="/routine" element={<RoutinePage useDataRoutine={useDataRoutine} />}></Route>
+            <Route path="/select" element={<CategoryPage useDataRoutine={useDataRoutine} fetchData={fetchData} detailData={detailData} useDetailExData={useDetailExData}/>}></Route>
+            <Route path="/routine" element={<RoutinePage useDataRoutine={useDataRoutine} fetchData={fetchData} detailData={detailData} useDetailExData={useDetailExData}/>}></Route>
             <Route path="/runningroutine" element={<RunningRoutinePage />}></Route>
             <Route path="/routineresult" element={<RoutineResultPage />}></Route>
         </Routes>
