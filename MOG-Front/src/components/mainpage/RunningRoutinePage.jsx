@@ -17,10 +17,14 @@ export default function RunningRoutinePage(){
     console.log('Rounning페이지로 넘어온 값 detailId:',detailId)
     const [initDetail,setDetail] = useState([]);
     const [showDetail,setshowDetail] = useState([]);
-
+    const loadRoutineDetail=async ()=>{
+            await axios.get(`${URL.ROUTINEDETAIL}/${routineId}`)
+            .then(res=> setDetail(res.data.state))
+            //.then(res=> console.log(res.data.state))
+    }
    
     const nextEx =()=>{
-        setshowDetail(res=>initDetail.filter(item=>item.id===res.id+1));
+        
     }
     const addExSet=()=>{
 
@@ -47,10 +51,14 @@ export default function RunningRoutinePage(){
 
     }
     useEffect(()=>{
+        loadRoutineDetail();
         console.log('받아온 루틴 디테일 ID:',params);
-        setshowDetail(initDetail.filter(item=>item.id===detailId));
+        //console.log('받아온 루틴 디테일 값들 initDetail:',initDetail);
     },[])
-    
+    useEffect(()=>{
+        setshowDetail(initDetail.filter(item=>item.id===detailId));
+        console.log('받아온 루틴 디테일 값들 initDetail:',initDetail);
+    },[initDetail])
 
     return<>
         <div className={"container mt-5 p-3"}></div>
@@ -61,11 +69,14 @@ export default function RunningRoutinePage(){
                         <h1>{item.names}</h1>
                     </div>
                 ))}
-                <div className={` ${styles.header} container`} >
+                {showDetail.map((item,index)=>(
+                <div key={index} className={` ${styles.header} container`} >
                     <button className={` btn btn-primary`} type="button" onClick={e=>plus()}>+</button>
-                   <h1 onChange={e => changeTime(e.target.value)}>30</h1>
+                   <h1 onChange={e => changeTime(e.target.value)}>{item.lest}</h1>
                    <button className={` btn btn-primary`} type="button" onClick={e=>minus()}>-</button>
                 </div>
+                ))}
+                
                 <div className={"container mt-0 p-0 d-grid gap-2"}>
                     <form className={"d-flex"}>
                         <button type="button" className="btn btn-primary disabled">1</button>
