@@ -80,6 +80,7 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
                 makeDetailNode.push({
                     id: addSetId[i].set_id,
                     names: addSetId[i].names,
+                    img: addSetId[i].imgfile,
                     lest:"30",
                     set: [{
                         id:"1",
@@ -110,6 +111,7 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
                 makeDetailNode.push({
                     id: addSetId[i].set_id,
                     names: addSetId[i].names,
+                    img: addSetId[i].imgfile,
                     lest:"30",
                     set: [{
                         id:"1",
