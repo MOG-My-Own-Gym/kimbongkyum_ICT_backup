@@ -21,10 +21,6 @@ const DataToss=()=>{
         setDetailExData(detailDataR.data);
     }
 
-    useEffect(()=>{
-        //fetchData();
-        console.log('처음 useDataRoutine:',useDataRoutine);
-    },[])
     return <>
         <Routes>
             <Route path="" element={<SelectMainpage useDataRoutine={useDataRoutine} fetchData={fetchData}/>}></Route>

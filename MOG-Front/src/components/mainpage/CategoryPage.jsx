@@ -84,8 +84,8 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
                     lest:"30",
                     set: [{
                         id:"1",
-                        weight: "0",    
-                        many: "0",
+                        weight: "10",    
+                        many: "1",
                     }]
                 })
                
@@ -115,8 +115,8 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
                     lest:"30",
                     set: [{
                         id:"1",
-                        weight: "0",    
-                        many: "0",
+                        weight: "10",    
+                        many: "1",
                     }]
                 })
             }

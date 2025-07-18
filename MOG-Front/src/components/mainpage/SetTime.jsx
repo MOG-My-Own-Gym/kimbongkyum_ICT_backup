@@ -3,13 +3,12 @@ import styles from "../../assets/bootstrap/css/mainpage.module.css";
 
 function SetTime({timeInit,setDetailTime,initDetailTime}) {
     const [isRunning, setIsRunning] = useState(false);
-
     useEffect(() => {
     let timer;
 
     if (isRunning && initDetailTime > 0) {
         timer = setTimeout(() => {
-        setIsRunning(prev => prev - 1);
+        setDetailTime(prev => prev - 1);
         }, 1000); // 1초마다 감소
     }
 
@@ -23,6 +22,7 @@ function SetTime({timeInit,setDetailTime,initDetailTime}) {
     const reset = () => {
         //setTime(timeInit);
         setIsRunning(false);
+        setDetailTime(timeInit);
     };
     const plus=()=>{
         //setTime(res=>res+10);

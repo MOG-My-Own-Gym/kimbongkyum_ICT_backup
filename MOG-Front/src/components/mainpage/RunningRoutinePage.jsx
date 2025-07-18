@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styles from "../../assets/bootstrap/css/mainpage.module.css";
 import "../../assets/bootstrap/css/bootstrap.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { URL } from "../../config/constants";
 import SetTime from "./SetTime";
@@ -9,54 +9,104 @@ import SetTime from "./SetTime";
 export default function RunningRoutinePage(){
     const navigate = useNavigate();
     const {search } = useLocation();
-    const {state } = useLocation();
-    console.log('Rounning페이지로 넘어온 값 state:',state)
     const params = new URLSearchParams(search);
     const routineId = params.get('routineId'); // "1"
     const detailId = params.get('DetailId');  // "1"
-    console.log('Rounning페이지로 넘어온 값 routineId:',routineId)
-    console.log('Rounning페이지로 넘어온 값 detailId:',detailId)
     const [initDetail,setDetail] = useState([]);
     const [showDetail,setshowDetail] = useState([]);
     const [addSetState,setAddState] = useState([]);
     const [initDetailTime,setDetailTime] = useState();
-    const [nextPrevNum,setNextPrevNum] = useState(1);
+    const [nextPrevNum,setNextPrevNum] = useState(parseInt(detailId));
+    const [isDisabledLeft,setIsDisabledLeft] = useState(false);
+    const [isDisabledRight,setIsDisabledRight] = useState(false);
+    const [checkRouData,setCheckRouData] = useState([]);
+
     const loadRoutineDetail=async ()=>{
-            await axios.get(`${URL.ROUTINEDETAIL}/${routineId}`)
-            .then(res=> setDetail(res.data.state))
-            //.then(res=> console.log(res.data.state))
+        await axios.get(`${URL.ROUTINEDETAIL}/${routineId}`)
+        .then(res=> {setDetail(()=>{
+            setshowDetail(()=>{
+                const showData = res.data.state.filter(item=>item.id===detailId)
+                nextPrevButtonData(detailId-1);
+                return showData;
+            });
+            return res.data.state
+        }
+        ); return res;})
+        .then(res=> setCheckRouData(res.data))
     }
-   
+
     const nextAndPrevExButton =(e)=>{
-        const nextExData = initDetail.filter(item=>item.id===String(parseInt(detailId)+nextPrevNum))
-        console.log('다음 또는 이전 버튼 누르면 나오는 값:',nextExData.length);
-        if(nextExData.length===0)  return alert('값 없음');
-        if(e==="next"){
-            setshowDetail(nextExData);
-            setNextPrevNum(prev=> prev+1)
-            console.log('다음 운동 아이디:',nextPrevNum)
-        }
-        else{
-            setshowDetail(initDetail.filter(item=>item.id===String(parseInt(detailId)-nextPrevNum)));
-            setNextPrevNum(prev=> prev-1)
-            console.log('전 운동 아이디:',nextPrevNum)
-        }
+        e.preventDefault();
+        setNextPrevNum(prev=>{
+            if(e.target.id==="next"){
+                const updated = prev +1;
+                nextPrevButtonData(updated-1);
+                setshowDetail([initDetail[updated-1]]);
+                return updated;
+            }
+            else{
+                const updated = prev -1;
+                nextPrevButtonData(updated-1);
+                setshowDetail([initDetail[updated-1]]);
+                return updated;
+            }
+        })
     }
-    const prevEx=()=>{
-        setshowDetail(initDetail.filter(item=>item.id===String(parseInt(detailId)-nextPrevNum)));
-        setNextPrevNum(prev=> prev-1)
-        console.log('전 운동 아이디:',nextPrevNum)
+    const nextPrevButtonData=(updated)=>{
+        if(updated===0)setIsDisabledLeft(true);
+        if(updated===initDetail.length -1)setIsDisabledRight(true);
+        if(updated!==0)setIsDisabledLeft(false);
+        if(updated!==initDetail.length -1)setIsDisabledRight(false);
     }
-    const addExSet=()=>{
-        const addSet =[{id:String(addSetState.length+1),weight: "0", many: "0"}]
-        setAddState(prev=>[...prev,...addSet]); 
+    const addAndRemoveExSet=(e)=>{
+        setAddState(prev=>{
+            const addSet =[{id:String(addSetState.length+1),weight: "10", many: "1"}]
+            const removeSet = addSetState.filter(item=>item.id !== String(addSetState.length))
+            const arrayEx= [...prev,...addSet];
+            const fixDeatilData =  initDetail.map(item=>{
+                if(item.id===String(nextPrevNum)){
+                    return {
+                        ...item,
+                        set:e.target.id==="add"?[...arrayEx]:[...removeSet]
+                    }
+                }
+                return item;
+                });
+            axios.put(`${URL.ROUTINEDETAIL}/${routineId}`,{
+                id:checkRouData.id,
+                state:[...fixDeatilData]
+            })
+            .then(res=>{console.log("운동 세부 내용 수정:",res.data.state);return res.data.state})
+            .then(rest=>setDetail(rest));
+            return e.target.id==="add"?arrayEx:removeSet;
+        }); 
     }
-    const removeExSet=()=>{
-        const addSet = addSetState.filter(item=>item.id !== String(addSetState.length))
-        setAddState(addSet); 
-    }
-    const fixKg=(e)=>{
-       
+    const fixKgAndManyNum=(e)=>{
+       const fixDeatilData =  initDetail.map(item=>{
+            if(item.id===String(nextPrevNum)){
+                return {
+                    ...item,
+                    lest:e.target.id==="minitimeout"?`${initDetailTime}`:item.lest,
+                    set:e.target.id!="minitimeout"?
+                    item.set.map(setItem=>
+                        setItem.id===String(e.target.id)?
+                        e.target.dataset.id==="weight"?
+                        {...setItem,weight:e.target.value}:
+                        {...setItem,many:e.target.value}:
+                        setItem
+                    )
+                    :item.set
+                }
+            }
+            return item;
+        });
+        axios.put(`${URL.ROUTINEDETAIL}/${routineId}`,{
+            id:checkRouData.id,
+            state:[...fixDeatilData]
+        })
+        .then(res=>{setDetail(res.data.state); return res.data.state})
+        .then(res=>setAddState(res[nextPrevNum-1].set))
+        e.target.value = '';
     }
     const fixNum=()=>{
 
@@ -64,23 +114,17 @@ export default function RunningRoutinePage(){
     
     const checkExResult=(e)=>{
     }
+    
     useEffect(()=>{
         loadRoutineDetail();
-        console.log('받아온 루틴 디테일 ID:',params);
-        //console.log('받아온 루틴 디테일 값들 initDetail:',initDetail);
     },[])
-    useEffect(()=>{
-        setshowDetail(initDetail.filter(item=>item.id===detailId));
-        console.log('받아온 루틴 디테일 값들 initDetail:',initDetail);
-    },[initDetail])
     useEffect(()=>{
         if(showDetail.length!==0){
             setAddState(showDetail[0].set);
             setDetailTime(showDetail[0].lest);
-            //console.log('화면에 뿌려줄 세트 디테일:',showDetail[0].set[0].many)
         }
+        
     },[showDetail])
-    console.log('화면에 뿌려줄 세트 수 :',addSetState);
     return<>
         <div className={"container mt-5 p-3"}></div>
             <button className={`btn btn-lg btn-primary`} type="button" onClick={()=>navigate(-1)}>뒤로가기</button>
@@ -103,29 +147,34 @@ export default function RunningRoutinePage(){
                     <form className={"d-flex"}>
                         <label className="btn btn-primary disabled">{item.id}</label>
                         <input 
+                            id={item.id}
+                            data-id={"weight"}
                             className={"form-control me-sm-2"} 
                             type="number" 
-                            onChange={e => fixKg(e.target.value)} 
+                            onBlur={e => fixKgAndManyNum(e)}
                             placeholder={item.weight} 
                         />
                         <input 
+                            id={item.id}
+                            data-id={"many"}
                             className={"form-control me-sm-2"} 
                             type="number" 
-                            onChange={e => fixNum(e.target.value)} 
-                            placeholder={item.many} />
+                            onBlur={e => fixKgAndManyNum(e)} 
+                            placeholder={item.many} 
+                        />
                         <button type="button" className="btn btn-primary" id={item.id} onClick={e=>checkExResult(e.target.id)} >○</button>
                     </form>
                 </div>
                 ))}
                 <div className={`container ${styles.runningFlexButton}`}>
-                    <button className={`${styles.buttonSize} btn btn-lg btn-primary`} style={{marginRight: "30%"}} type="button" onClick={e=>addExSet()}>+ 추가</button>
-                    <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={e=>removeExSet()}>- 삭제</button>
+                    <button className={`${styles.buttonSize} btn btn-lg btn-primary`} style={{marginRight: "30%"}} type="button" id='add' onClick={e=>addAndRemoveExSet(e)}>+ 추가</button>
+                    <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" id='remove' onClick={e=>addAndRemoveExSet(e)}>- 삭제</button>
                 </div>
             <div className={`${styles.dummyContainers} p-5 mt-4`}></div>
             <footer className={`${styles.flexButton}`}>        
-                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={()=>navigate("/data/routineresult")}>운동 추가</button>
-                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" id="prev" onClick={e=>nextAndPrevExButton(e.target.id)}>이전</button>
-                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" id="next" onClick={e=>nextAndPrevExButton(e.target.id)}>다음</button>
+                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} type="button" onClick={()=>navigate("/data/select",{state:routineId})}>운동 추가</button>
+                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} disabled={isDisabledLeft} type="button" id="prev" onClick={e=>nextAndPrevExButton(e)}>이전</button>
+                <button className={`${styles.buttonSize} btn btn-lg btn-primary`} disabled={isDisabledRight} type="button" id="next" onClick={e=>nextAndPrevExButton(e)}>다음</button>
             </footer>
         </div>
 
