@@ -6,7 +6,7 @@ import axios from "axios";
 import { URL } from "../../config/constants";
 import SetTime from "./SetTime";
 
-export default function RunningRoutinePage(){
+export default function RunningRoutinePage({setShowSecret,setDetailTime,setRoutineId,setCurrentDetailId}){
     const navigate = useNavigate();
     const {search } = useLocation();
     const params = new URLSearchParams(search);
@@ -15,7 +15,6 @@ export default function RunningRoutinePage(){
     const [initDetail,setDetail] = useState([]);
     const [showDetail,setshowDetail] = useState([]);
     const [addSetState,setAddState] = useState([]);
-    const [initDetailTime,setDetailTime] = useState();
     const [nextPrevNum,setNextPrevNum] = useState(parseInt(detailId));
     const [isDisabledLeft,setIsDisabledLeft] = useState(false);
     const [isDisabledRight,setIsDisabledRight] = useState(false);
@@ -86,16 +85,13 @@ export default function RunningRoutinePage(){
             if(item.id===String(nextPrevNum)){
                 return {
                     ...item,
-                    lest:e.target.id==="minitimeout"?`${initDetailTime}`:item.lest,
-                    set:e.target.id!="minitimeout"?
-                    item.set.map(setItem=>
+                    set:item.set.map(setItem=>
                         setItem.id===String(e.target.id)?
                         e.target.dataset.id==="weight"?
                         {...setItem,weight:e.target.value}:
                         {...setItem,many:e.target.value}:
                         setItem
                     )
-                    :item.set
                 }
             }
             return item;
@@ -117,7 +113,14 @@ export default function RunningRoutinePage(){
     
     useEffect(()=>{
         loadRoutineDetail();
-    },[])
+        setRoutineId(routineId);
+        setCurrentDetailId(nextPrevNum);
+        setShowSecret(true);
+    },[]);
+    useEffect(()=>{   
+        setCurrentDetailId(nextPrevNum);
+    },[nextPrevNum]);
+
     useEffect(()=>{
         if(showDetail.length!==0){
             setAddState(showDetail[0].set);
@@ -135,13 +138,6 @@ export default function RunningRoutinePage(){
                         <img style={{width:'200px'}} src={item.img}/>
                     </div>
                 ))}
-                {
-                showDetail.length!==0
-                ?
-                <SetTime timeInit={showDetail[0].lest} setDetailTime={setDetailTime} initDetailTime={initDetailTime}></SetTime>
-                :
-                <h2>로딩 중</h2>
-                }
                 {addSetState.map((item,index)=>(
                 <div key={index} className={"container mt-0 p-0 d-grid gap-2"}>
                     <form className={"d-flex"}>
