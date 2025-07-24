@@ -146,6 +146,71 @@
         "rouTime": "38",
         "exVolum": "980"
       }
+    },
+    {
+      "id": "6",
+      "retId": "3",
+      "tStart": "2025-07-24T10:07:50.755Z",
+      "tEnd": "2025-07-24T10:08:27.978Z",
+      "routineEndDetails": [
+        {
+          "srName": "3/4 Sit-Up",
+          "setNumber": "5",
+          "reps": "10",
+          "weight": "1"
+        },
+        {
+          "srName": "3/4 Sit-Up",
+          "setNumber": "4",
+          "reps": "10",
+          "weight": "1"
+        },
+        {
+          "srName": "3/4 Sit-Up",
+          "setNumber": "3",
+          "reps": "10",
+          "weight": "1"
+        },
+        {
+          "srName": "3/4 Sit-Up",
+          "setNumber": "2",
+          "reps": "10",
+          "weight": "1"
+        },
+        {
+          "srName": "3/4 Sit-Up",
+          "setNumber": "1",
+          "reps": "10",
+          "weight": "1"
+        },
+        {
+          "srName": "Ab Crunch Machine",
+          "setNumber": "3",
+          "reps": "33",
+          "weight": "12"
+        },
+        {
+          "srName": "Ab Crunch Machine",
+          "setNumber": "1",
+          "reps": "33",
+          "weight": "1"
+        },
+        {
+          "srName": "Ab Crunch Machine",
+          "setNumber": "2",
+          "reps": "22",
+          "weight": "22"
+        }
+      ],
+      "routineResult": {
+        "muscle": "28",
+        "kcal": "230",
+        "reSet": "2",
+        "setNum": "4",
+        "volum": "1000",
+        "rouTime": "38",
+        "exVolum": "980"
+      }
     }
   ],
   "routine_detail": [
@@ -358,6 +423,26 @@
               "id": "1",
               "weight": "10",
               "many": "1"
+            },
+            {
+              "id": "2",
+              "weight": "10",
+              "many": "1"
+            },
+            {
+              "id": "3",
+              "weight": "10",
+              "many": "1"
+            },
+            {
+              "id": "4",
+              "weight": "10",
+              "many": "1"
+            },
+            {
+              "id": "5",
+              "weight": "10",
+              "many": "1"
             }
           ]
         },
@@ -369,7 +454,22 @@
           "set": [
             {
               "id": "1",
-              "weight": "10",
+              "weight": "33",
+              "many": "1"
+            },
+            {
+              "id": "2",
+              "weight": "22",
+              "many": "22"
+            },
+            {
+              "id": "3",
+              "weight": "33",
+              "many": "12"
+            },
+            {
+              "id": "4",
+              "weight": "22",
               "many": "1"
             }
           ]
