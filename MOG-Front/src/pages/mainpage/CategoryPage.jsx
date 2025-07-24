@@ -5,7 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { URL } from "../../config/constants";
 
-export default function CategoryPage({useDataRoutine,fetchData,detailData,useDetailExData}){
+export default function CategoryPage({
+        useDataRoutine,
+        fetchData,
+        detailData,
+        useDetailExData
+    }){
+
     const makeListNode =[];
     const id = [];
     const nameR = [];
@@ -34,12 +40,11 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
     const [initSaveExercise,setSaveExercise] = useState([]);
     const [initSaveExerciseSpan,setSaveExerciseSpan] = useState([]);
     const [isHidden, setIsHidden] = useState(true);
-    const [test, settest] = useState([]);
+    const [showMaxCategory,setShowMaxCategory] = useState(5); 
     
     const {state} = useLocation();
     const navigate = useNavigate();
     const makeRoutineContainer = useRef(null);
-    console.log('state:',state);
 
     function makedetil(e,nameStr){
         e.preventDefault();
@@ -59,13 +64,9 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
         )        
         setDeduplicationDetail(filterMakeListNode);      
     }
-    const [useCount,setConunt] = useState(1);
-    //console.log('useCount:',useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1);
     
     const makeRoutineButton= async () => {
         //e.preventDefault();
-        //fetchData();
-        console.log('useDataRoutine=======:',useDataRoutine);
         if(state===null) {alert('루틴 생성 실패'); return;}
         const makeDetailNode =[];
         if(state===true){
@@ -74,9 +75,7 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
             addSetId = initSaveExercise.map((item,index)=>({...item,set_id: String(index + 1)}));
             const nameR = 'routine'+String(useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1);
             await axios.post(URL.ROUNTINE,{id:String(useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1),name:nameR,state:[...addSetId]})
-            console.log('addSetId의 값1:',addSetId);
             for(let i=0;i <= addSetId.length-1;i++){
-                console.log('state[i].id:',addSetId[i].id);
                 makeDetailNode.push({
                     id: addSetId[i].set_id,
                     names: addSetId[i].names,
@@ -87,27 +86,16 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
                         weight: "10",    
                         many: "1",
                     }]
-                })
-               
+                })         
             }
             await axios.post(URL.ROUTINEDETAIL,{id:String(useDataRoutine.length<=0?1:parseInt(useDataRoutine[useDataRoutine.length-1].id)+1),state:[...makeDetailNode]})
             //setDataRoutine(prev=>[...prev,response.data]);
             navigate(`/data/routine?routineId=${useDataRoutine.length+1}`)
         }else{
             const makeRoutineId = useDataRoutine[state-1].state.length===0?0:Math.max(...useDataRoutine[state-1].state.map(item=>parseInt(item.set_id)));
-            console.log('useDataRoutine[state-1].state:',useDataRoutine[state-1].state);
-            console.log('makeRoutineId:',makeRoutineId);
-            //console.log('initSaveExercise2:',initSaveExercise);
             addSetId = initSaveExercise.map((item,index)=>({...item,set_id: String(makeRoutineId + index + 1)}));
-            console.log('addSetId의 값2:',addSetId);
-            console.log('useDetailExData디테일 값:',useDetailExData);
             await axios.put(`${URL.ROUNTINE}/${state}`,{id:String(useDataRoutine[state-1].id),name:useDataRoutine[state-1].name,state:[...useDataRoutine[state-1].state, ...addSetId]})
-                        .then(res=>console.log('res:%O',res))
-                        .catch(err=>console.log(err))
-            //console.log('state[i].id:',addSetId[i].id);
-            //const makeDetailNode2= [useDetailExData[state-1]].map((item,index)=>({...item, id: String(item.length + index + 1),names: addSetId[index].names}))
             for(let i=0;i <= addSetId.length-1;i++){
-                console.log('state[i].id:',addSetId[i].id);
                 makeDetailNode.push({
                     id: addSetId[i].set_id,
                     names: addSetId[i].names,
@@ -120,14 +108,9 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
                     }]
                 })
             }
-            console.log('최종 디테일 값 makeDetailNode:',makeDetailNode);
             await axios.put(`${URL.ROUTINEDETAIL}/${state}`,{id:String(useDataRoutine[state-1].id),state:[...useDetailExData[state-1].state,...makeDetailNode]})
-            //setDataRoutine(prev=>[...prev[state-1].state,...initSaveExercise]);
             navigate(`/data/routine?routineId=${state}`)
-            //navigate("/data/routine",{state:state})
-        }
-        
-            
+        }     
     }
 
     const saveRoutineButton=(e)=>{
@@ -135,34 +118,34 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
         saveR = initmakeDetail.filter(item =>
         item.names.includes(e.currentTarget.id));
         setSaveExercise(prev=>[...prev,...saveR]); 
-        settest(prev=>[...prev,...saveR]);
         countSaveRoutineInt = initSaveExercise.filter(item=>item.names===e.currentTarget.id).length+1;
         e.target.children[1].textContent=countSaveRoutineInt;
-        if(countSaveRoutineInt===0){
-           setIsHidden(true);
-        } 
-        else{
-            setIsHidden(false);
-        }
-        setSaveExerciseSpan(prev=>[...prev,e.target.children[1].id]);
+        //console.log(e.target.children[1].id);
+        setSaveExerciseSpan(prev=>{
+            const inputExSpan = [...prev,e.target.children[1].id]
+            setIsHidden(inputExSpan.length===0?true:false);
+            console.log("1:",inputExSpan)
+            return inputExSpan
+        });
+        
         
     }
     const deleteRoutineButten=(e)=>{
         e.preventDefault();
         const deleteSaveData = initSaveExercise.slice(0,-1);
-        setSaveExercise(deleteSaveData);
-        const spanNode = document.getElementById(initSaveExerciseSpan[initSaveExerciseSpan.length -1]);
-        if(initSaveExercise.length === 0) {
-            document.querySelectorAll('span').textContent='';
-            setIsHidden(true);
-        }
-        else {
+        setSaveExercise(deleteSaveData);   
+        setSaveExerciseSpan(res=>{
+            const delExDate = res.slice(0,-1)!==null?res.slice(0,-1):[]
+            const spanNode = document.getElementById(res[res.length -1]);
+            setIsHidden(delExDate.length===0?true:false);
             const compreToDeleteEx = spanNode.id.slice(0,-4);
+            console.log("compreToDeleteEx:",compreToDeleteEx)
             countSaveRoutineInt = initSaveExercise.filter(item=>item.names===compreToDeleteEx).length-1;
-            spanNode.textContent=countSaveRoutineInt;
-            setIsHidden(false);
-        }
-        setSaveExerciseSpan(initSaveExerciseSpan.slice(0,-1)!==null?initSaveExerciseSpan.slice(0,-1):[]);
+            console.log("countSaveRoutineInt:",countSaveRoutineInt)
+            spanNode.textContent=countSaveRoutineInt===0?"":countSaveRoutineInt;
+            console.log("2:",delExDate)
+            return delExDate;
+        });
     }
     
     useEffect(()=>{
@@ -177,8 +160,6 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
             .then(exercise => {     
                 const arr = Object.values(exercise)[0]
                 const makeDetailNode = [];
-                const imgfile = [];
-                //console.log(...arr)
                 for (let i=0;i<arr.length;i++) {
 
                     const name1 = arr[i].name.replaceAll(" ","_");
@@ -232,11 +213,26 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
             });    
         fetchData();
         detailData();
+
+        const handleScroll = () => {
+        const scrollTop = window.scrollY; // 현재 스크롤 위치
+        const windowHeight = window.innerHeight; // 창의 높이
+        const documentHeight = document.documentElement.scrollHeight; // 문서 전체 높이
+
+        // 바닥 도달 여부 확인
+        if (scrollTop + windowHeight >= documentHeight - 10) {
+            // 여기에 추가 로직 (데이터 더 불러오기 등)
+            setShowMaxCategory(prev=>prev+5)
+        }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll); // 컴포넌트 언마운트 시 제거
     },[])
-    
+
     return<>
         <div className={"container mt-5 p-3"}></div>
-            <button className={`btn btn-lg btn-primary`} type="button" onClick={()=>navigate('/data/')}>뒤로가기</button>
+            <button className={`btn btn-lg btn-danger`} type="button" onClick={()=>navigate('/data/')}>뒤로가기</button>
             <form className={"d-flex"}>
                 <input className={"form-control me-sm-2"} type="search" placeholder="운동 이름을 입력하세요." onChange={e => setSearch(e.target.value)}/>
             </form>
@@ -306,7 +302,7 @@ export default function CategoryPage({useDataRoutine,fetchData,detailData,useDet
                 ?
                 <h1>불러오는 중</h1>
                 :
-                initDeduplicationDetail.map(item=>(
+                initDeduplicationDetail.slice(0,showMaxCategory).map(item=>(
                     <div className="container" key={item.id}>
                         <button  className="btn btn-lg btn-dark"  id={item.names}
                             style={{width:'100%', fontSize:'25px', textAlign:'left',display:'flex'}}  

@@ -11,7 +11,7 @@ import RecordPage from './pages/Record/RecordPage';
 import LoginPage from './pages/Login/LoginPage';
 import Social from './pages/Social/Social';
 import MyPage from './pages/Mypage/MyPage';
-import DataToss from './components/mainpage/DataToss';
+import DataToss from './pages/mainpage/DataToss';
 
 function App() {
   const { toast, dispatch } = useContext(ToastContext);
