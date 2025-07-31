@@ -63,6 +63,7 @@ export default function SelectMainpage({
                 return checkUser
             })
         }
+        console.log(checkRoutineUser.length)
     },[useDataRoutine])
 
     
