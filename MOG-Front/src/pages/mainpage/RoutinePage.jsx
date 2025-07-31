@@ -75,7 +75,6 @@ export default function RoutinePage({
     setRoutineId(params);
     fetchData();
     detailData();
-    console.log(startRrcodResultData);
   }, []);
   return (
     <>
